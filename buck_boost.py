@@ -1,6 +1,5 @@
 import sympy as sp
 import matplotlib.pyplot as plt
-import numpy as np
 
 plt.rcParams['figure.figsize'] = [25, 30]
 plt.rcParams['font.size'] = 20

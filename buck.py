@@ -1,4 +1,6 @@
 import numpy as np
+import sympy as sp
+from scipy.integrate import quad
 import matplotlib.pyplot as plt
 
 plt.rcParams['figure.figsize'] = [25, 30]
@@ -20,11 +22,13 @@ class Buck:
         :param ccm: True, se é do tipo CCM
         """
         if dcm:
+            self.is_dcm = True
             self.type = 1
             self.percent_duty = percent_duty
             self.name = "BUCK DCM"
             self.tx = 1.0
         elif ccm:
+            self.is_dcm = False
             self.type = 0
             self.percent_duty = percent_duty
             self.name = "BUCK CCM"
@@ -574,3 +578,109 @@ class Buck:
         plt.subplots_adjust(hspace=0.65)
         plt.legend()
         plt.show()
+
+    def calc_vd_max(self):
+        """
+        Vd_max = Vi
+
+        :return: Vd_max
+        """
+        if self.is_dcm:
+            return self.vi
+        else:
+            return self.vi
+
+    def calc_id_avg(self):
+        """
+        Integrei as equações de iL nos intervalos em que o diodo atua.
+        """
+
+        il_max = self.il_max
+        vo = self.vo
+        dt = self.__DT__
+        ind = self.ind
+
+        def func(t):
+            return il_max - (vo * (t - dt) / ind)
+
+        if self.is_dcm:
+            integral, erro = quad(func, self.__DT__, self.tx)
+
+            return integral / self.t
+        else:
+            integral, erro = quad(func, self.__DT__, self.t)
+
+            return integral / self.t
+
+    def calc_id_max(self):
+        """
+        Se CCM:
+        Id_max = Il_max
+
+        :return: Ids_max
+
+        Se DCM:
+        :return: Vi DT / L
+        """
+        if self.is_dcm:
+            return self.il_max
+        else:
+            return self.il_max
+
+    def calc_vds_max(self):
+        """
+        Vds_max = Vi
+
+        :return: Vds_max
+        """
+        if self.is_dcm:
+            return self.vi
+        else:
+            return self.vi
+
+    def calc_ids_rms(self):
+        """
+        Se CCM:
+
+        Ids_rms = sqrt((1/T)integral[0,T] is(t)^2 dt)
+
+        is(t) = iL, 0 <= t < DT e 0 DT <= t < T
+
+        Se DCM:
+
+        Ids_rms =
+
+        :return: Ids_rms
+        """
+        il_min = self.il_min
+        vo = self.vo
+        vi = self.vi
+        dt = self.__DT__
+        ind = self.ind
+
+        if self.is_dcm:
+            def func(t):
+                return ((vi - vo) * t / ind) ** 2
+
+            integral, erro = quad(func, 0, self.__DT__)
+            return sp.sqrt(integral / self.t)
+        else:
+            def func(t):
+                return (il_min + ((vi - vo) * t / ind)) ** 2
+
+            integral, erro = quad(func, 0, self.__DT__)
+            return sp.sqrt(integral / self.t)
+
+    def calc_ids_max(self):
+        """
+        Se CCM:
+        Ids_max = Il_max
+
+        Se DCM:
+        Ids_max = Il_max
+        :return: Ids_max
+        """
+        if self.is_dcm:
+            return self.il_max
+        else:
+            return self.il_max

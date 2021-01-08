@@ -346,3 +346,96 @@ class BuckBoost:
             return self.__plot_ir()
         elif q == 'vr':
             return self.__plot_vr()
+
+    def calc_vd_max(self):
+        """
+        Vd_max = Vi + Vo
+
+        :return: Vd_max
+        """
+        if self.is_dcm:
+            return self.vi + self.vo
+        else:
+            return self.vi + self.vo
+
+    def calc_id_avg(self):
+        """
+        Se CCM:
+        Id_avg = (1/T)(integral[0,T] id(t) dt)
+
+        id(t) = 0, 0 <= t < DT e iL DT <= t < T
+
+        :return: Ids_rms
+
+        Se DCM:
+
+        :return: Io
+        """
+        if self.is_dcm:
+            return self.io
+        else:
+            integral = self.il * (self.t - self.__DT__)
+
+            return integral / self.t
+
+    def calc_id_max(self):
+        """
+        Se CCM:
+        Id_max = Il_max
+
+        :return: Ids_max
+
+        Se DCM:
+        :return: Vi DT / L
+        """
+        if self.is_dcm:
+            return self.vi * self.__DT__ / self.L
+        else:
+            return self.__il_max
+
+    def calc_vds_max(self):
+        """
+        Vds_max = Vi + Vo
+
+        :return: Vds_max
+        """
+        if self.is_dcm:
+            return self.vi + self.vo
+        else:
+            return self.vi + self.vo
+
+    def calc_ids_rms(self):
+        """
+        Se CCM:
+
+        Ids_rms = (1/T)sqrt(integral[0,T] is(t)^2 dt)
+
+        is(t) = iL, 0 <= t < DT e 0 DT <= t < T
+
+        Se DCM:
+
+        Ids_rms = Vi DT sqrt(D/3) / L
+
+        :return: Ids_rms
+        """
+
+        if self.is_dcm:
+            return self.vi * self.__DT__ * sp.sqrt(self.d / 3) / self.L
+        else:
+
+            integral = (self.il ** 2) * self.__DT__ / self.t
+            return sp.sqrt(integral)
+
+    def calc_ids_max(self):
+        """
+        Se CCM:
+        Ids_max = Il_max
+
+        Se DCM:
+        Ids_max = Vi DT / L
+        :return: Ids_max
+        """
+        if self.is_dcm:
+            return self.vi * self.__DT__ / self.L
+        else:
+            return self.__il_max
